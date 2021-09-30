@@ -411,6 +411,43 @@ def update():
     head9.grid(column=8, row=3, pady=(0, 15), padx=20)
     head9.bind("<Button-1>", show)
 
+def print_titles():
+    c.execute("SELECT *, oid FROM info")
+    records = c.fetchall()
+    print_records = ""
+    j = 3
+    for record in records:
+        i = 0
+        j += 1
+        while i < len(record):
+            print_records = (str(record[i])) + "\n"
+            if (i == 0):
+                if (j % 2 == 0):
+                    query_label = Label(frame, text=print_records, font=(12, 12), bg="lightblue", width=18, height=2,
+                                        anchor=CENTER, cursor="hand2")
+                    query_label.grid(row=j, column=i)
+                    query_label.bind("<Button-1>", show)
+                    i += 1
+                else:
+                    query_label = Label(frame, text=print_records, font=(12, 12), bg="lightskyblue", width=18, height=2,
+                                        anchor=CENTER, cursor="hand2")
+                    query_label.grid(row=j, column=i)
+                    query_label.bind("<Button-1>", show)
+                    i += 1
+            else:
+                if (j % 2 == 0):
+                    query_label = Label(frame, text=print_records, font=(12, 12), bg="lightblue", width=15, height=2,
+                                        anchor=CENTER, cursor="hand2")
+                    query_label.grid(row=j, column=i)
+                    query_label.bind("<Button-1>", show)
+                    i += 1
+                else:
+                    query_label = Label(frame, text=print_records, font=(12, 12), bg="lightskyblue", width=15, height=2,
+                                        anchor=CENTER, cursor="hand2")
+                    query_label.grid(row=j, column=i)
+                    query_label.bind("<Button-1>", show)
+                    i += 1
+
 #Create Function to Delete A Record
 def delete():
     # Create databases
@@ -833,7 +870,7 @@ def forCar():
 
 #For Scrollbar
 def myfunction(event):
-    canvas.configure(scrollregion=canvas.bbox("all"), width=root.winfo_width()*.98, height=root.winfo_height()*.79)
+    canvas.configure(scrollregion=canvas.bbox("all"), width=root.winfo_width()*.98, height=root.winfo_height()*.74)
 
 # Code to add widgets will go here...
 myLabel = Label(root, text="HWY 12 Titles", font=(30,30))
@@ -847,7 +884,7 @@ carSearch_button =  TkinterCustomButton(text="Enter", corner_radius=0, width=50,
 carSearch_button.place(x=w-(w/8), y=110)
 
 myframe = Frame(root,relief=GROOVE,width=w,height=l,bd=1)
-myframe.place(x=0, y=160)
+myframe.place(x=0, y=155)
 
 canvas = Canvas(myframe)
 frame = Frame(canvas)
@@ -879,19 +916,7 @@ c.execute("""CREATE TABLE IF NOT EXISTS info(
 update()
 
 # Add Widgets/Update
-c.execute("SELECT *, oid FROM info")
-records = c.fetchall()
-print_records = ""
-j = 3
-for record in records:
-    i = 0
-    j += 1
-    while i < len(record):
-        print_records = (str(record[i])) + "\n"
-        query_label = Label(frame, text=print_records, font=(12, 12), cursor="hand2")
-        query_label.grid(row=j, column=i, pady=20, padx=15)
-        query_label.bind("<Button-1>", show)
-        i += 1
+print_titles()
 
 delete_btn = TkinterCustomButton(text="Delete Vehicle", corner_radius=0, cursor="hand2", command=delete, border_width=1, border_color="black")
 delete_btn.place(x=w-(w/5), y=70, anchor=N)
