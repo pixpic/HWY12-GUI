@@ -8,7 +8,7 @@ import babel.numbers
 
 root = Tk()
 w = 1280
-l = 780
+l = 700
 root.geometry(("%dx%d" % (w,l)))
 root.title("HWY12")
 today = datetime.date.today()
@@ -391,34 +391,32 @@ def update():
     head4.grid(column=3, row=3, pady=(0, 15), padx=20)
     head4.bind("<Button-1>", show)
 
-    head5 = Label(frame, text="Color", font=(16, 16), cursor="hand2")
-    head5.grid(column=4, row=3, pady=(0, 15), padx=20)
-    head5.bind("<Button-1>", show)
-
     head6 = Label(frame, text="Title Status", font=(16, 16), cursor="hand2")
-    head6.grid(column=5, row=3, pady=(0, 15), padx=20)
+    head6.grid(column=4, row=3, pady=(0, 15), padx=20)
     head6.bind("<Button-1>", show)
 
     head7 = Label(frame, text="From", font=(16, 16), cursor="hand2")
-    head7.grid(column=6, row=3, pady=(0, 15), padx=20)
+    head7.grid(column=5, row=3, pady=(0, 15), padx=20)
     head7.bind("<Button-1>", show)
 
     head8 = Label(frame, text="Date In", font=(16, 16), cursor="hand2")
-    head8.grid(column=7, row=3, pady=(0, 15), padx=20)
+    head8.grid(column=6, row=3, pady=(0, 15), padx=20)
     head8.bind("<Button-1>", show)
 
     head9 = Label(frame, text="ID", font=(16, 16), cursor="hand2")
-    head9.grid(column=8, row=3, pady=(0, 15), padx=20)
+    head9.grid(column=7, row=3, pady=(0, 15), padx=20)
     head9.bind("<Button-1>", show)
 
 def print_titles():
-    c.execute("SELECT *, oid FROM info")
+    c.execute("SELECT car_vin, car_make, car_model, car_year, car_status, c_from, c_date, oid FROM info")
     records = c.fetchall()
     print_records = ""
     j = 3
     for record in records:
         i = 0
         j += 1
+        if i == 5:
+            i += 1
         while i < len(record):
             print_records = (str(record[i])) + "\n"
             if (i == 0):
@@ -462,6 +460,7 @@ def delete():
         for widget in frame.winfo_children():
             widget.destroy()
         c.execute("DELETE from info WHERE oid = " + current)
+        c.execute("DELETE FROM SQLITE_SEQUENCE WHERE NAME='info'")
 
         update()
         # Add Widgets/Update
@@ -495,9 +494,11 @@ def edit():
     global c_date
     global cal
     global c_from
+    global current
 
     mid = Toplevel()
     mid.title("Edit Entry")
+    print(int(current))
 
     #Creating Calendar
     cal = Calendar(mid, selectmode="day", year=today.year, month=today.month, day=today.day)
@@ -510,7 +511,10 @@ def edit():
     c = conn.cursor()
 
     # Create Text Boxes
+    c.execute("SELECT *, oid FROM info")
+    records = c.fetchall()
     c_vin = Entry(mid, width=30)
+    c_vin.insert(0,(str(records[int(current)][0])))
     c_vin.grid(row=1, column=1, pady=10)
 
     c_make = Entry(mid, width=30)
