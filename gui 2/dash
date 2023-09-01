@@ -9,6 +9,7 @@ ctk.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
 
 
 def sideframe():
+
     f1 = ctk.CTkFrame(app, height=750, width=250)
     f1.grid(row=0, column=0, rowspan=3, sticky='NWSE')
     f1.columnconfigure(0, weight=1)
@@ -27,6 +28,14 @@ def sideframe():
     tag_label.grid(row=3, column=0, sticky='S')
     
 def new_entry():
+    global vin_entry
+    global make_box
+    global model_entry
+    global year_entry
+    global color_entry
+    global from_entry
+    global date_entry
+
     top = ctk.CTkToplevel()
     # mm/dd/yy
     t_day = date.today().strftime("%m/%d/%y")
@@ -67,8 +76,13 @@ def new_entry():
     date_entry = ctk.CTkEntry(top, placeholder_text=str(t_day))
     date_entry.grid(row=7, column=0, columnspan=2)
 
+    submit_btn = ctk.CTkButton(top, text="Submit", command=submit)
+    submit_btn.grid(row=8, column=0, columnspan=2)
+
+
 #Submit New Record
 def submit():
+    print(make_box.get())
     # Create databases
     conn = sqlite3.connect("titles.db")
 
@@ -76,23 +90,11 @@ def submit():
     c = conn.cursor()
 
     #Insert Into Table
-    c.execute("INSERT INTO info VALUES (:c_vin, :c_make, :c_model, :c_year, :c_color, :c_status , :c_from, :c_date)",
-        {
-            "c_vin": c_vin.get(),
-            "c_make": c_make.get(),
-            "c_model": c_model.get(),
-            "c_year": c_year.get(),
-            "c_color": c_color.get(),
-            "c_status": c_status.get(),
-            "c_from": c_from.get(),
-            "c_date":  cal.get_date()
-        })
-
-    c.execute("SELECT *, oid FROM info")
-    records = c.fetchall()
+    c.execute("INSERT INTO info (car_VIN, car_make, car_model, car_year, car_color, c_from, c_date) VALUES (?,?,?,?,?,?,?)", (vin_entry.get(), make_box.get(), model_entry.get(), year_entry.get(), color_entry.get(), from_entry.get(), date_entry.get()))
     
-ctk.set_appearance_mode("dark")  # Modes: system (default), light, dark
-ctk.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green 
+    conn.commit()
+    c.close
+    conn.close()
 
 app = ctk.CTk()  # create CTk window like you do with the Tk window
 app.title('HWY12 Dashboard')
@@ -102,9 +104,19 @@ app.columnconfigure(1, weight=4)
 
 make_values = ['Acura', 'BMW', 'Cadillac', 'Honda', 'Chevy', 'Saturn', 'Audi', 'Saab']
 
+# Create databases
+conn = sqlite3.connect("titles.db")
+
+# Create cursor
+c = conn.cursor()
+c.execute("SELECT *, oid FROM info")
+records = c.fetchall()
 
 f2 = ctk.CTkFrame(app, height=100, width=350)
 f2.grid(row=0, column=1, sticky='NWSE')
+
+title_label = ctk.CTkLabel(f2, text='HWY12 Dashboard')
+title_label.pack()
 
 f3 = ctk.CTkFrame(app, height=350, width=350, fg_color='green')
 f3.grid(row=1, column=1, sticky='NWSE')
@@ -126,8 +138,9 @@ new_btn.grid(row=1, column=1, sticky='N', padx=10, pady=10 )
 new_btn = ctk.CTkButton(f3, text="Edit")
 new_btn.grid(row=1, column=2, sticky='N', padx=10, pady=10)
 
-f4 = ctk.CTkFrame(app, height=150, width=850, fg_color='yellow')
+f4 = ctk.CTkFrame(app, height=150, width=850)
 f4.grid(row=2, column=1, sticky='NWSE')
+
 
 #Create databases
 conn = sqlite3.connect("titles.db")
@@ -142,27 +155,18 @@ c.execute("""CREATE TABLE IF NOT EXISTS info(
     car_model text,
     car_year integer,
     car_color text,
-    car_status text,
     c_from text,
     c_date text
-      )""")
+        )""")
 
 # Add Widgets/Update
 c.execute("SELECT *, oid FROM info")
 records = c.fetchall()
+
 print_records = ""
-i = 0
-j = 3
 for record in records:
-    i = 0
-    j += 1
-    while i < len(record):
-        print_records = records
-
-        query_label = ctk.CTkLabel(f2, text=print_records, font=(12, 12), cursor="hand2")
-        query_label.place
-        i += 1
-
+    query_label = ctk.CTkLabel(view_screen, text=record)
+    query_label.grid(row=0, column=0)
 
 
 sideframe()
