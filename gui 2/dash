@@ -1,0 +1,170 @@
+import customtkinter as ctk
+import os
+import sqlite3
+from datetime import date
+
+ctk.set_appearance_mode("dark")  # Modes: system (default), light, dark
+ctk.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
+
+
+
+def sideframe():
+    f1 = ctk.CTkFrame(app, height=750, width=250)
+    f1.grid(row=0, column=0, rowspan=3, sticky='NWSE')
+    f1.columnconfigure(0, weight=1)
+    f1.rowconfigure([0,1,2], weight=1)
+
+    titles_btn = ctk.CTkButton(f1, text='Titles')
+    titles_btn.grid(row=0, column=0, padx=20)
+
+    inventory_btn = ctk.CTkButton(f1, text='Inventory', state='disabled')
+    inventory_btn.grid(row=1, column=0, padx=10)
+
+    payments_btn = ctk.CTkButton(f1, text='Payments', state='disabled')
+    payments_btn.grid(row=2, column=0, padx=10)
+
+    tag_label = ctk.CTkLabel(f1, text='Made by Ricky', font=('CTkfont', 14))
+    tag_label.grid(row=3, column=0, sticky='S')
+    
+def new_entry():
+    top = ctk.CTkToplevel()
+    # mm/dd/yy
+    t_day = date.today().strftime("%m/%d/%y")
+     
+
+    vin_label = ctk.CTkLabel(top, text="VIN")
+    vin_label.grid(row=0, column=0)
+    vin_entry = ctk.CTkEntry(top)
+    vin_entry.grid(row=1, column=0)
+
+    make_label = ctk.CTkLabel(top, text="Make")
+    make_label.grid(row=0, column=1)
+    make_box = ctk.CTkComboBox(top, values=make_values)
+    make_box.grid(row=1, column=1)
+    
+    model_label = ctk.CTkLabel(top, text="Model")
+    model_label.grid(row=2, column=0)
+    model_entry = ctk.CTkEntry(top)
+    model_entry.grid(row=3, column=0)
+
+    year_label = ctk.CTkLabel(top, text="Year")
+    year_label.grid(row=2, column=1)
+    year_entry = ctk.CTkEntry(top)
+    year_entry.grid(row=3, column=1)
+
+    color_label = ctk.CTkLabel(top, text="Color")
+    color_label.grid(row=4, column=0)
+    color_entry = ctk.CTkEntry(top)
+    color_entry.grid(row=5, column=0)
+
+    from_label = ctk.CTkLabel(top, text="From")
+    from_label.grid(row=4, column=1)
+    from_entry = ctk.CTkEntry(top)
+    from_entry.grid(row=5, column=1)
+
+    date_label = ctk.CTkLabel(top, text="Date")
+    date_label.grid(row=6, column=0, columnspan=2)
+    date_entry = ctk.CTkEntry(top, placeholder_text=str(t_day))
+    date_entry.grid(row=7, column=0, columnspan=2)
+
+#Submit New Record
+def submit():
+    # Create databases
+    conn = sqlite3.connect("titles.db")
+
+    # Create cursor
+    c = conn.cursor()
+
+    #Insert Into Table
+    c.execute("INSERT INTO info VALUES (:c_vin, :c_make, :c_model, :c_year, :c_color, :c_status , :c_from, :c_date)",
+        {
+            "c_vin": c_vin.get(),
+            "c_make": c_make.get(),
+            "c_model": c_model.get(),
+            "c_year": c_year.get(),
+            "c_color": c_color.get(),
+            "c_status": c_status.get(),
+            "c_from": c_from.get(),
+            "c_date":  cal.get_date()
+        })
+
+    c.execute("SELECT *, oid FROM info")
+    records = c.fetchall()
+    
+ctk.set_appearance_mode("dark")  # Modes: system (default), light, dark
+ctk.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green 
+
+app = ctk.CTk()  # create CTk window like you do with the Tk window
+app.title('HWY12 Dashboard')
+app.rowconfigure([0,1,2], weight=1)
+app.columnconfigure(0, weight=1)
+app.columnconfigure(1, weight=4)
+
+make_values = ['Acura', 'BMW', 'Cadillac', 'Honda', 'Chevy', 'Saturn', 'Audi', 'Saab']
+
+
+f2 = ctk.CTkFrame(app, height=100, width=350)
+f2.grid(row=0, column=1, sticky='NWSE')
+
+f3 = ctk.CTkFrame(app, height=350, width=350, fg_color='green')
+f3.grid(row=1, column=1, sticky='NWSE')
+f3.columnconfigure(0, weight=1)
+f3.rowconfigure([0,1], weight=1)
+
+view_screen = ctk.CTkScrollableFrame(f3)
+view_screen.grid(row=0, column=0, rowspan=2, sticky='NSWE')
+
+new_btn = ctk.CTkButton(f3, text="New Entry", command=new_entry)
+new_btn.grid(row=0, column=1, sticky='S', padx=10, pady=10)
+   
+new_btn = ctk.CTkButton(f3, text="Search")    
+new_btn.grid(row=0, column=2, sticky='S', padx=10, pady=10)
+
+new_btn = ctk.CTkButton(f3, text="Delete")
+new_btn.grid(row=1, column=1, sticky='N', padx=10, pady=10 )
+
+new_btn = ctk.CTkButton(f3, text="Edit")
+new_btn.grid(row=1, column=2, sticky='N', padx=10, pady=10)
+
+f4 = ctk.CTkFrame(app, height=150, width=850, fg_color='yellow')
+f4.grid(row=2, column=1, sticky='NWSE')
+
+#Create databases
+conn = sqlite3.connect("titles.db")
+
+#Create cursor
+c = conn.cursor()
+
+#Create table
+c.execute("""CREATE TABLE IF NOT EXISTS info(
+    car_VIN text,
+    car_make text,
+    car_model text,
+    car_year integer,
+    car_color text,
+    car_status text,
+    c_from text,
+    c_date text
+      )""")
+
+# Add Widgets/Update
+c.execute("SELECT *, oid FROM info")
+records = c.fetchall()
+print_records = ""
+i = 0
+j = 3
+for record in records:
+    i = 0
+    j += 1
+    while i < len(record):
+        print_records = records
+
+        query_label = ctk.CTkLabel(f2, text=print_records, font=(12, 12), cursor="hand2")
+        query_label.place
+        i += 1
+
+
+
+sideframe()
+
+app.mainloop()
