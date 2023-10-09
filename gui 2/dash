@@ -6,7 +6,7 @@ from datetime import date
 ctk.set_appearance_mode("dark")  # Modes: system (default), light, dark
 ctk.set_default_color_theme("blue")  # Themes: blue (default), dark-blue, green
 
-
+global search_entry
 
 def sideframe():
 
@@ -37,6 +37,7 @@ def new_entry():
     global date_entry
 
     top = ctk.CTkToplevel()
+    top.lift()
     # mm/dd/yy
     t_day = date.today().strftime("%m/%d/%y")
      
@@ -79,7 +80,6 @@ def new_entry():
     submit_btn = ctk.CTkButton(top, text="Submit", command=submit)
     submit_btn.grid(row=8, column=0, columnspan=2)
 
-
 #Submit New Record
 def submit():
     print(make_box.get())
@@ -96,11 +96,38 @@ def submit():
     c.close
     conn.close()
 
+def search_titles():
+    for widget in view_screen.winfo_children():
+        widget.destroy()
+
+    search = search_entry.get()
+
+    #Create databases
+    conn = sqlite3.connect("titles.db")
+
+    #Create cursor
+    c = conn.cursor()
+
+    c.execute("SELECT *, oid FROM info")
+    records = c.fetchall()
+
+    for record in records:
+        for info in record:
+            if search in str(info):
+                record_label=ctk.CTkLabel(view_screen, text=record, cursor="hand2", font=('Arial',14, 'bold'))
+                record_label.pack()
+            
+
+
+
+
+
 app = ctk.CTk()  # create CTk window like you do with the Tk window
 app.title('HWY12 Dashboard')
 app.rowconfigure([0,1,2], weight=1)
 app.columnconfigure(0, weight=1)
 app.columnconfigure(1, weight=4)
+
 
 make_values = ['Acura', 'BMW', 'Cadillac', 'Honda', 'Chevy', 'Saturn', 'Audi', 'Saab']
 
@@ -118,25 +145,31 @@ f2.grid(row=0, column=1, sticky='NWSE')
 title_label = ctk.CTkLabel(f2, text='HWY12 Dashboard')
 title_label.pack()
 
-f3 = ctk.CTkFrame(app, height=350, width=350, fg_color='green')
+f3 = ctk.CTkFrame(app, height=350, width=350)
 f3.grid(row=1, column=1, sticky='NWSE')
 f3.columnconfigure(0, weight=1)
 f3.rowconfigure([0,1], weight=1)
 
-view_screen = ctk.CTkScrollableFrame(f3)
-view_screen.grid(row=0, column=0, rowspan=2, sticky='NSWE')
+view_screen = ctk.CTkScrollableFrame(f3, label_text="Titles")
+view_screen.grid(row=0, column=0, rowspan=3, sticky='NSWE')
 
 new_btn = ctk.CTkButton(f3, text="New Entry", command=new_entry)
-new_btn.grid(row=0, column=1, sticky='S', padx=10, pady=10)
+new_btn.grid(row=0, column=1, padx=10, pady=10)
    
 new_btn = ctk.CTkButton(f3, text="Search")    
-new_btn.grid(row=0, column=2, sticky='S', padx=10, pady=10)
+new_btn.grid(row=0, column=2,padx=10, pady=10)
 
 new_btn = ctk.CTkButton(f3, text="Delete")
-new_btn.grid(row=1, column=1, sticky='N', padx=10, pady=10 )
+new_btn.grid(row=1, column=1, padx=10, pady=10 )
 
 new_btn = ctk.CTkButton(f3, text="Edit")
-new_btn.grid(row=1, column=2, sticky='N', padx=10, pady=10)
+new_btn.grid(row=1, column=2, padx=10, pady=10)
+
+search_entry = ctk.CTkEntry(f3, placeholder_text='Search For Title')
+search_entry.grid(row=2, column = 1, sticky="NWE")
+
+search_btn = ctk.CTkButton(f3, text="Search", command=search_titles)
+search_btn.grid(row=2, column = 2)
 
 f4 = ctk.CTkFrame(app, height=150, width=850)
 f4.grid(row=2, column=1, sticky='NWSE')
@@ -163,10 +196,8 @@ c.execute("""CREATE TABLE IF NOT EXISTS info(
 c.execute("SELECT *, oid FROM info")
 records = c.fetchall()
 
-print_records = ""
-for record in records:
-    query_label = ctk.CTkLabel(view_screen, text=record)
-    query_label.grid(row=0, column=0)
+for record in records[-20:]:
+    record_label = ctk.CTkLabel(view_screen, text=record, cursor="hand2", font=('Arial',14, 'bold')).pack()
 
 
 sideframe()
